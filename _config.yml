@@ -6,7 +6,6 @@ title: blank # the website title (if blank, full name will be used instead)
 first_name: Rodion
 middle_name: Romanovich
 last_name: Raskolnikov
-email: you@example.com
 description: > # the ">" symbol means to ignore newlines until "footer_text:"
   The personal website of Rodion Romanovich Raskolnikov, a fictional character from Fyodor Dostoevsky's <i>Crime and Punishment</i>.
 footer_text: >
@@ -123,8 +122,8 @@ bing_site_verification: # out your bing-site-verification ID (Bing Webmaster)
 # Blog
 # -----------------------------------------------------------------------------
 
-blog_name: My Life # blog_name will be displayed in your blog page
-blog_description: my personal blog
+blog_name: sincerely, raskolnikov # blog_name will be displayed in your blog page
+blog_description: a collection of my life
 permalink: /blog/:year/:title/
 
 # Pagination
@@ -157,23 +156,12 @@ disqus_shortname: al-folio # put your disqus shortname
 # External sources.
 # If you have blog posts published on medium.com or other external sources,
 # you can display them in your blog by adding a link to the RSS feed.
-external_sources:
-  - name: medium.com
-    rss_url: https://medium.com/@al-folio/feed
+
 
 # -----------------------------------------------------------------------------
 # Collections
 # -----------------------------------------------------------------------------
 
-collections:
-  news:
-    defaults:
-      layout: post
-    output: true
-    permalink: /news/:path/
-  projects:
-    output: true
-    permalink: /projects/:path/
 
 announcements:
   enabled: true
