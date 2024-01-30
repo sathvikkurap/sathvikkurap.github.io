@@ -1,7 +1,7 @@
 ---
 layout: default
 permalink: /listening_list/
-title: Listening List
+title: music
 nav: true
 nav_order: 8
 ---
