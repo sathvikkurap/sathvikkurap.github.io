@@ -120,7 +120,7 @@ bing_site_verification: # out your bing-site-verification ID (Bing Webmaster)
 # -----------------------------------------------------------------------------
 
 blog_name: coldly, raskolnikov # blog_name will be displayed in your blog page
-blog_description: a collection of my life
+blog_description: collection of my most recent writing
 permalink: /blog/:year/:title/
 
 # Pagination
