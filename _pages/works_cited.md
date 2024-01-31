@@ -1,7 +1,7 @@
 ---
 layout: default
-permalink: /listening_list/
-title: music
+permalink: /works_cited/
+title: works cited
 nav: true
 nav_order: 9
 ---
