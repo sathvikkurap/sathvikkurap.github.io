@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quadratic Residue Checker</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #result { margin-top: 10px; color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Quadratic Residue Checker</h1>
+    <label for="numberInput">Enter a number:</label>
+    <input type="number" id="numberInput" placeholder="Enter number" required>
+    <label for="modInput">Enter a prime modulus (p):</label>
+    <input type="number" id="modInput" placeholder="Enter prime modulus" required>
+    <button onclick="checkQuadraticResidue()">Check</button>
+    <div id="result"></div>
+
+    <script>
+        function checkQuadraticResidue() {
+            const number = parseInt(document.getElementById('numberInput').value);
+            const p = parseInt(document.getElementById('modInput').value);
+            const resultDiv = document.getElementById('result');
+
+            // Check for valid inputs
+            if (isNaN(number) || isNaN(p) || p <= 1) {
+                resultDiv.textContent = "Please enter valid numbers.";
+                return;
+            }
+
+            // Using Euler's criterion: n^(p-1)/2 ≡ 1 (mod p) if n is a quadratic residue mod p
+            const residueCheck = Math.pow(number, (p - 1) / 2) % p;
+
+            // Display result
+            if (residueCheck === 1) {
+                resultDiv.textContent = `${number} is a quadratic residue modulo ${p}.`;
+            } else {
+                resultDiv.textContent = `${number} is not a quadratic residue modulo ${
