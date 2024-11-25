@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affine Cipher Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #result { margin-top: 10px; color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Affine Cipher Tool</h1>
+    <label for="messageInput">Enter message:</label>
+    <input type="text" id="messageInput" placeholder="Enter message" required>
+    <label for="aInput">Enter 'a' (must be coprime to 26):</label>
+    <input type="number" id="aInput" placeholder="Enter 'a'" required>
+    <label for="bInput">Enter 'b':</label>
+    <input type="number" id="bInput" placeholder="Enter 'b'" required>
+    <button onclick="encrypt()">Encrypt</button>
+    <button onclick="decrypt()">Decrypt</button>
+    <div id="result"></div>
+
+    <script>
+        function modInverse(a, m) {
+            for (let x = 1; x < m; x++) {
+                if ((a * x) % m === 1) {
+                    return x;
+                }
+            }
+            return 1;
+        }
+
+        function affineCipher(message, a, b, encrypt) {
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let result = '';
+            message = message.toUpperCase();
+            
+            for (let i = 0; i < message.length; i++) {
+                if (alphabet.includes(message[i])) {
+                    let x = alphabet.indexOf(message[i]);
+                    let y;
+                    if (encrypt) {
+                        y = (a * x + b) % 26;
+                    } else {
+                        let aInverse = modInverse(a, 26);
+                        y = (aInverse * (x - b + 26)) % 26;
+                    }
+                    result += alphabet[y];
+                } else {
+                    result += message[i];
+                }
+            }
+            return result;
+        }
+
+        function encrypt() {
+            const message = document.getElementById('messageInput').value;
+            const a = parseInt(document.getElementById('aInput').value);
+            const b = parseInt(document.getElementById('bInput').value);
+            const resultDiv = document.getElementById('result');
+
+            if (!message || isNaN(a) || isNaN(b)) {
+                resultDiv.textContent = "Please enter valid inputs.";
+                return;
+            }
+
+            if (a % 2 === 0 || a % 13 === 0) {
+                resultDiv.textContent = "'a' must be coprime to 26.";
+                return;
+            }
+
+            const encryptedMessage = affineCipher(message, a, b, true);
+            resultDiv.textContent = `Encrypted message: ${encryptedMessage}`;
+        }
+
+        function decrypt() {
+            const message = document.getElementById('messageInput').value;
+            const a = parseInt(document.getElementById('aInput').value);
+            const b = parseInt(document.getElementById('bInput').value);
+            const resultDiv = document.getElementById('result');
+
+            if (!message || isNaN(a) || isNaN(b)) {
+                resultDiv.textContent = "Please enter valid inputs.";
+                return;
+            }
+
+            if (a % 2 === 0 || a % 13 === 0) {
+                resultDiv.textContent = "'a' must be coprime to 26.";
+                return;
+            }
+
+            const decryptedMessage = affineCipher(message, a, b, false);
+            resultDiv.textContent = `Decrypted message: ${decryptedMessage}`;
+        }
+    </script>
+</body>
+</html>
