@@ -1,1 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shift Cipher Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #result { margin-top: 10px; color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Shift Cipher Tool</h1>
+    <label for="messageInput">Enter a message:</label>
+    <input type="text" id="messageInput" placeholder="Enter message" required>
+    <label for="shiftInput">Enter shift value:</label>
+    <input type="number" id="shiftInput" placeholder="Enter shift value" required>
+    <button onclick="encrypt()">Encrypt</button>
+    <button onclick="decrypt()">Decrypt</button>
+    <div id="result"></div>
 
+    <script>
+        function shiftCipher(message, shift, encrypt) {
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let result = '';
+            message = message.toUpperCase();
+            
+            for (let i = 0; i < message.length; i++) {
+                if (alphabet.includes(message[i])) {
+                    let index = alphabet.indexOf(message[i]);
+                    let newIndex = encrypt ? 
+                        (index + shift + 26) % 26 : 
+                        (index - shift + 26) % 26;
+                    result += alphabet[newIndex];
+                } else {
+                    result += message[i];
+                }
+            }
+            return result;
+        }
+
+        function encrypt() {
+            const message = document.getElementById('messageInput').value;
+            const shift = parseInt(document.getElementById('shiftInput').value);
+            const resultDiv = document.getElementById('result');
+
+            if (!message || isNaN(shift)) {
+                resultDiv.textContent = "Please enter a valid message and shift value.";
+                return;
+            }
+
+            const encryptedMessage = shiftCipher(message, shift, true);
+            resultDiv.textContent = `Encrypted message: ${encryptedMessage}`;
+        }
+
+        function decrypt() {
+            const message = document.getElementById('messageInput').value;
+            const shift = parseInt(document.getElementById('shiftInput').value);
+            const resultDiv = document.getElementById('result');
+
+            if (!message || isNaN(shift)) {
+                resultDiv.textContent = "Please enter a valid message and shift value.";
+                return;
+            }
+
+            const decryptedMessage = shiftCipher(message, shift, false);
+            resultDiv.textContent = `Decrypted message: ${decryptedMessage}`;
+        }
+    </script>
+</body>
+</html>
