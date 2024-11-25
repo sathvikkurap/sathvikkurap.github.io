@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caesar Cipher Decoder</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #result { margin-top: 10px; }
+        .shift { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Caesar Cipher Decoder</h1>
+    <label for="cipherInput">Enter ciphertext:</label>
+    <input type="text" id="cipherInput" placeholder="Enter ciphertext" required>
+    <button onclick="decodeCaesar()">Decode</button>
+    <div id="result"></div>
+
+    <script>
+        function decodeCaesar() {
+            const ciphertext = document.getElementById('cipherInput').value.toUpperCase();
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+
+            if (!ciphertext) {
+                resultDiv.textContent = "Please enter a ciphertext.";
+                return;
+            }
+
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+            for (let shift = 0; shift < 26; shift++) {
+                let plaintext = '';
+                for (let i = 0; i < ciphertext.length; i++) {
+                    if (alphabet.includes(ciphertext[i])) {
+                        let index = alphabet.indexOf(ciphertext[i]);
+                        let newIndex = (index - shift + 26) % 26;
+                        plaintext += alphabet[newIndex];
+                    } else {
+                        plaintext += ciphertext[i];
+                    }
+                }
+                resultDiv.innerHTML += `<p><span class="shift">Shift ${shift}:</span> ${plaintext}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
