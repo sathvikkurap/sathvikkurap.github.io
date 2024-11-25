@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discrete Logarithm Calculator (Naive Method)</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #result { margin-top: 10px; color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Discrete Logarithm Calculator (Naive Method)</h1>
+    <label for="baseInput">Enter base g:</label>
+    <input type="number" id="baseInput" placeholder="Enter g" required>
+    <label for="resultInput">Enter result y:</label>
+    <input type="number" id="resultInput" placeholder="Enter y" required>
+    <label for="modInput">Enter modulus p:</label>
+    <input type="number" id="modInput" placeholder="Enter p" required>
+    <button onclick="calculateDiscreteLog()">Calculate</button>
+    <div id="result"></div>
+
+    <script>
+        function calculateDiscreteLog() {
+            const g = parseInt(document.getElementById('baseInput').value);
+            const y = parseInt(document.getElementById('resultInput').value);
+            const p = parseInt(document.getElementById('modInput').value);
+            const resultDiv = document.getElementById('result');
+
+            for (let x = 0; x < p; x++) {
+                if (Math.pow(g, x) % p === y) {
+                    resultDiv.textContent = `Discrete logarithm: ${x}`;
+                    return;
+                }
+            }
+            resultDiv.textContent = "No solution found";
+        }
+    </script>
+</body>
+</html>
