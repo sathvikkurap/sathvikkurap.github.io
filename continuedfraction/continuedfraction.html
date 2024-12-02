@@ -54,7 +54,7 @@
         }
 
         function runContinuedFractionFactorization() {
-            let n = BigInt(document.getElementById('number').value);
+            let n = Number(document.getElementById('number').value);
             let factors = continuedFractionFactorization(n);
             if (factors) {
                 document.getElementById('result').textContent = `Factors of ${n} are: ${factors[0]} and ${factors[1]}`;
