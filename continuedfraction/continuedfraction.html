@@ -6,15 +6,27 @@
     <title>Continued Fraction Factorization</title>
     <script>
         function* continuedFractionSqrt(n) {
-            let m = 0, d = 1, a0 = Math.floor(Math.sqrt(n));
+            let m = 0n, d = 1n, a0 = bigIntSqrt(n);
             let a = a0;
             yield a;
             while (true) {
                 m = d * a - m;
                 d = (n - m * m) / d;
-                a = Math.floor((a0 + m) / d);
+                a = (a0 + m) / d;
                 yield a;
             }
+        }
+
+        function bigIntSqrt(n) {
+            if (n < 0n) return NaN;
+            if (n < 2n) return n;
+            let x = n / 2n;
+            let y = (x + n / x) / 2n;
+            while (y < x) {
+                x = y;
+                y = (x + n / x) / 2n;
+            }
+            return x;
         }
 
         function gcd(a, b) {
@@ -27,13 +39,13 @@
             let p = [0n, 1n];
             let q = [1n, 0n];
             for (let i = 0; i < 100; i++) {
-                let a = BigInt(gen.next().value);
+                let a = gen.next().value;
                 let pNew = a * p[1] + p[0];
                 let qNew = a * q[1] + q[0];
-                let diff = pNew * pNew - BigInt(n) * qNew * qNew;
-                let factor = gcd(BigInt(n), pNew - qNew);
-                if (factor !== 1n && factor !== BigInt(n)) {
-                    return [factor, BigInt(n) / factor];
+                let diff = pNew * pNew - n * qNew * qNew;
+                let factor = gcd(n, pNew - qNew);
+                if (factor !== 1n && factor !== n) {
+                    return [factor, n / factor];
                 }
                 p = [p[1], pNew];
                 q = [q[1], qNew];
