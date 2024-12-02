@@ -4,21 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Continued Fraction Factorization</title>
+    <script>
+        function* continuedFractionSqrt(n) {
+            let m = 0, d = 1, a0 = Math.floor(Math.sqrt(n));
+            let a = a0;
+            yield a;
+            while (true) {
+                m = d * a - m;
+                d = (n - m * m) / d;
+                a = Math.floor((a0 + m) / d);
+                yield a;
+            }
+        }
+
+        function gcd(a, b) {
+            if (b === 0n) return a;
+            return gcd(b, a % b);
+        }
+
+        function continuedFractionFactorization(n) {
+            let gen = continuedFractionSqrt(n);
+            let p = [0n, 1n];
+            let q = [1n, 0n];
+            for (let i = 0; i < 100; i++) {
+                let a = BigInt(gen.next().value);
+                let pNew = a * p[1] + p[0];
+                let qNew = a * q[1] + q[0];
+                let diff = pNew * pNew - BigInt(n) * qNew * qNew;
+                let factor = gcd(BigInt(n), pNew - qNew);
+                if (factor !== 1n && factor !== BigInt(n)) {
+                    return [factor, BigInt(n) / factor];
+                }
+                p = [p[1], pNew];
+                q = [q[1], qNew];
+            }
+            return null;
+        }
+
+        function runContinuedFractionFactorization() {
+            let n = BigInt(document.getElementById('number').value);
+            let factors = continuedFractionFactorization(n);
+            if (factors) {
+                document.getElementById('result').textContent = `Factors of ${n} are: ${factors[0]} and ${factors[1]}`;
+            } else {
+                document.getElementById('result').textContent = `Failed to factorize ${n} within iteration limit.`;
+            }
+        }
+    </script>
 </head>
 <body>
     <h1>Continued Fraction Factorization Method</h1>
-    <p>This project implements the Continued Fraction Factorization method, which uses the continued fraction expansion of square roots to factor large integers.</p>
-    <h2>Key Features:</h2>
-    <ul>
-        <li>Generation of continued fraction expansions</li>
-        <li>Implementation of convergent finding algorithm</li>
-        <li>Factorization using smooth numbers</li>
-    </ul>
-    <h2>Example Usage:</h2>
-    <pre><code>
-let n = 987654321;
-let factors = continued_fraction_factorization(n);
-console.log("Factors of " + n + " are: " + factors.join(", "));
-    </code></pre>
+    <p>Enter a number to factorize:</p>
+    <input type="number" id="number" placeholder="Enter a number">
+    <button onclick="runContinuedFractionFactorization()">Factorize</button>
+    <p id="result"></p>
 </body>
 </html>
