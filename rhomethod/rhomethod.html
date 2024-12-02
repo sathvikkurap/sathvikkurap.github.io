@@ -4,20 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pollard's Rho Algorithm</title>
+    <script>
+        function gcd(a, b) {
+            if (b === 0) return a;
+            return gcd(b, a % b);
+        }
+
+        function pollardRho(n) {
+            if (n % 2 === 0) return 2;
+            
+            let x = 2, y = 2, d = 1;
+            let f = (x) => (BigInt(x) * BigInt(x) + BigInt(1)) % BigInt(n);
+            
+            while (d === 1) {
+                x = f(x);
+                y = f(f(y));
+                d = gcd(Math.abs(x - y), n);
+            }
+            return d;
+        }
+
+        function runPollardRho() {
+            let n = BigInt(document.getElementById('number').value);
+            let result = pollardRho(n);
+            document.getElementById('result').textContent = `One of the divisors for ${n} is ${result}`;
+        }
+    </script>
 </head>
 <body>
     <h1>Pollard's Rho Algorithm Implementation</h1>
-    <p>This project implements the Pollard's Rho algorithm for prime factorization, which is particularly efficient for large composite numbers with small prime factors.</p>
-    <h2>Key Features:</h2>
-    <ul>
-        <li>Efficient factorization of large numbers</li>
-        <li>Implementation of modular exponentiation</li>
-        <li>Utilizes the birthday paradox principle</li>
-    </ul>
-    <h2>Example Usage:</h2>
-    <pre><code>
-let n = 10967535067;
-console.log("One of the divisors for " + n + " is " + PollardRho(n));
-    </code></pre>
+    <p>Enter a number to factorize:</p>
+    <input type="number" id="number" placeholder="Enter a number">
+    <button onclick="runPollardRho()">Factorize</button>
+    <p id="result"></p>
 </body>
 </html>
