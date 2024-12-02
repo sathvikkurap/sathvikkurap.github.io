@@ -4,21 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quadratic Sieve Implementation</title>
+    <script>
+        function isPrime(n) {
+            if (n <= 1) return false;
+            if (n <= 3) return true;
+            if (n % 2 === 0 || n % 3 === 0) return false;
+            for (let i = 5; i * i <= n; i += 6) {
+                if (n % i === 0 || n % (i + 2) === 0) return false;
+            }
+            return true;
+        }
+
+        function quadraticSieve(n) {
+            let factorBase = [];
+            for (let p = 2; p < 100; p++) {
+                if (isPrime(p)) factorBase.push(p);
+            }
+            
+            let x = Math.ceil(Math.sqrt(n));
+            while (true) {
+                let y2 = x * x - n;
+                if (Math.sqrt(y2) % 1 === 0) {
+                    let y = Math.sqrt(y2);
+                    return [x - y, x + y];
+                }
+                x++;
+            }
+        }
+
+        function runQuadraticSieve() {
+            let n = BigInt(document.getElementById('number').value);
+            let factors = quadraticSieve(n);
+            document.getElementById('result').textContent = `Factors of ${n} are: ${factors[0]} and ${factors[1]}`;
+        }
+    </script>
 </head>
 <body>
     <h1>Quadratic Sieve Implementation</h1>
-    <p>This project implements the Quadratic Sieve algorithm, one of the fastest known algorithms for factoring large integers.</p>
-    <h2>Key Features:</h2>
-    <ul>
-        <li>Efficient factorization of large numbers</li>
-        <li>Implementation of smooth number detection</li>
-        <li>Utilizes factor base for sieving</li>
-    </ul>
-    <h2>Example Usage:</h2>
-    <pre><code>
-let n = 1234567890123456789;
-let factors = quadratic_sieve(n);
-console.log("Factors of " + n + " are: " + factors.join(", "));
-    </code></pre>
+    <p>Enter a number to factorize (this is a simplified version and may not work for very large numbers):</p>
+    <input type="number" id="number" placeholder="Enter a number">
+    <button onclick="runQuadraticSieve()">Factorize</button>
+    <p id="result"></p>
 </body>
 </html>
