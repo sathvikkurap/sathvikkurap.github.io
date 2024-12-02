@@ -3,36 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fermat Factorization Method</title>
+    <title>Factorization Methods</title>
     <script>
+        function gcd(a, b) {
+            while (b !== 0n) {
+                [a, b] = [b, a % b];
+            }
+            return a;
+        }
+
+        function sqrt(x) {
+            if (x < BigInt((Number.MAX_SAFE_INTEGER + 1) / 2)) {
+                return BigInt(Math.floor(Math.sqrt(Number(x) + 0.5)));
+            }
+            let a = x, b = x + 1n;
+            while (a < b) {
+                b = a;
+                a = (b + x / b) / 2n;
+            }
+            return b;
+        }
+
         function fermatFactorization(n) {
-            let a = BigInt(Math.ceil(Math.sqrt(Number(n))));
+            let a = sqrt(n);
             let b2 = a * a - n;
             while (!isSquare(b2)) {
                 a++;
                 b2 = a * a - n;
             }
-            let b = BigInt(Math.sqrt(Number(b2)));
+            let b = sqrt(b2);
             return [a - b, a + b];
         }
 
         function isSquare(n) {
-            let root = BigInt(Math.sqrt(Number(n)));
-            return root * root === BigInt(n);
+            let root = sqrt(n);
+            return root * root === n;
         }
 
-        function runFermatFactorization() {
+        function continuedFractionFactorization(N) {
+            N = BigInt(N);
+            for (let k = 1n;; k += 1n) {
+                const kN = k * N;
+                const fraction = continuedFractionForSqrt(kN);
+                let [hprev, h] = [0n, 1n];
+
+                let a;
+                while ((a = fraction.next().value) !== undefined) {
+                    [hprev, h] = [h, BigInt(a) * h + hprev];
+                    h = h % N;
+                    const X = h % N;
+                    const Y = (X * X - kN) % N;
+
+                    if (Y === 0n) {
+                        const factor = gcd(X + 1n, N);
+                        if (factor !== 1n && factor !== N) return factor;
+                    }
+                }
+            }
+        }
+
+        function continuedFractionForSqrt(n) {
+            n = BigInt(n);
+            if (n < 0n) {
+                throw new RangeError();
+            }
+            const root = sqrt(n);
+            const remainder = n - root * root;
+            const i = Number(root) * 2 <= Number.MAX_SAFE_INTEGER ? Number(root) : root;
+            let state = 0;
+            const one = i / i;
+            let zprev = one;
+            let z = typeof i === "number" ? Number(remainder) : remainder;
+            let y = i;
+
+            return {
+                next: function continuedFractionForSqrt() {
+                    if (state === 0) {
+                        state = 1;
+                        return {value: i, done: false};
+                    }
+                    if (remainder !== 0n) {
+                        while (state === 1 || zprev !== one) {
+                            state = 2;
+                            const q = (i + y) / z;
+                            const ynew = q * z - y;
+                            const znew = zprev + q * (y - ynew);
+                            y = ynew;
+                            zprev = z;
+                            z = znew;
+                            return {value: q, done: false};
+                        }
+                    }
+                    return {value: undefined, done: true};
+                }
+            };
+        }
+
+        function runFactorization() {
             let n = BigInt(document.getElementById('number').value);
-            let [factor1, factor2] = fermatFactorization(n);
-            document.getElementById('result').textContent = `Factors of ${n} are: ${factor1} and ${factor2}`;
+            let method = document.getElementById('method').value;
+            let result;
+
+            if (method === 'fermat') {
+                let [factor1, factor2] = fermatFactorization(n);
+                result = `Factors of ${n} are: ${factor1} and ${factor2}`;
+            } else if (method === 'continued-fraction') {
+                let factor = continuedFractionFactorization(n);
+                result = factor ? `One factor of ${n} is: ${factor}` : `Failed to factorize ${n}`;
+            }
+
+            document.getElementById('result').textContent = result;
         }
     </script>
 </head>
 <body>
-    <h1>Fermat Factorization Method</h1>
-    <p>Enter a number to factorize (works best for numbers that are the product of two close factors):</p>
+    <h1>Number Factorization</h1>
+    <p>Enter a number to factorize:</p>
     <input type="number" id="number" placeholder="Enter a number">
-    <button onclick="runFermatFactorization()">Factorize</button>
+    <select id="method">
+        <option value="fermat">Fermat Factorization</option>
+        <option value="continued-fraction">Continued Fraction Factorization</option>
+    </select>
+    <button onclick="runFactorization()">Factorize</button>
     <p id="result"></p>
 </body>
 </html>
