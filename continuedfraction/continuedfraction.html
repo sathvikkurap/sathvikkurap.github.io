@@ -5,61 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Continued Fraction Factorization</title>
     <script>
-        function* continuedFractionSqrt(n) {
-            let m = 0n, d = 1n, a0 = bigIntSqrt(n);
-            let a = a0;
-            yield a;
-            while (true) {
-                m = d * a - m;
-                d = (n - m * m) / d;
-                a = (a0 + m) / d;
-                yield a;
+        function continuedFractionForSqrt(n) {
+            n = BigInt(n);
+            if (n < 0n) {
+                throw new RangeError();
             }
+            const root = sqrt(n);
+            const remainder = n - root * root;
+            const i = Number(root) * 2 <= Number.MAX_SAFE_INTEGER ? Number(root) : root;
+            let state = 0;
+            const one = i / i;
+            let zprev = one;
+            let z = typeof i === "number" ? Number(remainder) : remainder;
+            let y = i;
+
+            return {
+                next: function continuedFractionForSqrt() {
+                    if (state === 0) {
+                        state = 1;
+                        return {value: i, done: false};
+                    }
+                    if (remainder !== 0n) {
+                        while (state === 1 || zprev !== one) {
+                            state = 2;
+                            const q = (i + y) / z;
+                            const ynew = q * z - y;
+                            const znew = zprev + q * (y - ynew);
+                            y = ynew;
+                            zprev = z;
+                            z = znew;
+                            return {value: q, done: false};
+                        }
+                    }
+                    return {value: undefined, done: true};
+                }
+            };
         }
 
-        function bigIntSqrt(n) {
-            if (n < 0n) return NaN;
-            if (n < 2n) return n;
-            let x = n / 2n;
-            let y = (x + n / x) / 2n;
-            while (y < x) {
-                x = y;
-                y = (x + n / x) / 2n;
+        function sqrt(x) {
+            if (x < BigInt((Number.MAX_SAFE_INTEGER + 1) / 2)) {
+                return BigInt(Math.floor(Math.sqrt(Number(x) + 0.5)));
             }
-            return x;
+            const q = (log2(x) / 4n);
+            const initialGuess = ((sqrt(x >> (q * 2n)) + 1n) << q);
+            let a = initialGuess, b = a + 1n;
+            while (a < b) {
+                b = a;
+                a = (b + x / b) / 2n;
+            }
+            return b;
+        }
+
+        function log2(x) {
+            return BigInt(x.toString(16).length * 4);
         }
 
         function gcd(a, b) {
-            if (b === 0n) return a;
-            return gcd(b, a % b);
+            while (b !== 0n) {
+                [a, b] = [b, a % b];
+            }
+            return a;
         }
 
-        function continuedFractionFactorization(n) {
-            let gen = continuedFractionSqrt(n);
-            let p = [0n, 1n];
-            let q = [1n, 0n];
-            for (let i = 0; i < 100; i++) {
-                let a = gen.next().value;
-                let pNew = a * p[1] + p[0];
-                let qNew = a * q[1] + q[0];
-                let diff = pNew * pNew - n * qNew * qNew;
-                let factor = gcd(n, pNew - qNew);
-                if (factor !== 1n && factor !== n) {
-                    return [factor, n / factor];
+        function ContinuedFractionFactorization(N) {
+            N = BigInt(N);
+            for (let k = 1n;; k += 1n) {
+                const kN = k * N;
+                const fraction = continuedFractionForSqrt(kN);
+                let [hprev, h] = [0n, 1n];
+
+                let a;
+                while ((a = fraction.next().value) !== undefined) {
+                    [hprev, h] = [h, BigInt(a) * h + hprev];
+                    h = h % N;
+                    const X = h % N;
+                    const Y = (X * X - kN) % N;
+
+                    if (Y === 0n) {
+                        const factor = gcd(X + 1n, N);
+                        if (factor !== 1n && factor !== N) return factor;
+                    }
                 }
-                p = [p[1], pNew];
-                q = [q[1], qNew];
             }
-            return null;
         }
 
         function runContinuedFractionFactorization() {
-            let n = Number(document.getElementById('number').value);
-            let factors = continuedFractionFactorization(n);
-            if (factors) {
-                document.getElementById('result').textContent = `Factors of ${n} are: ${factors[0]} and ${factors[1]}`;
+            let n = BigInt(document.getElementById('number').value);
+            let factor = ContinuedFractionFactorization(n);
+            if (factor) {
+                document.getElementById('result').textContent = `Factors of ${n} are: ${factor} and ${n / factor}`;
             } else {
-                document.getElementById('result').textContent = `Failed to factorize ${n} within iteration limit.`;
+                document.getElementById('result').textContent = `Failed to factorize ${n}.`;
             }
         }
     </script>
