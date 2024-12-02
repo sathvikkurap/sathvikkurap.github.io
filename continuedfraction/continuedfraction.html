@@ -5,6 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Continued Fraction Factorization</title>
     <script>
+        function gcd(a, b) {
+            while (b !== 0n) {
+                [a, b] = [b, a % b];
+            }
+            return a;
+        }
+
+        function log2(x) {
+            return BigInt(x.toString(16).length * 4);
+        }
+
+        function sqrt(x) {
+            if (x < BigInt((Number.MAX_SAFE_INTEGER + 1) / 2)) {
+                return BigInt(Math.floor(Math.sqrt(Number(x) + 0.5)));
+            }
+            const q = (log2(x) / 4n);
+            const initialGuess = ((sqrt(x >> (q * 2n)) + 1n) << q);
+            let a = initialGuess, b = a + 1n;
+            while (a < b) {
+                b = a;
+                a = (b + x / b) / 2n;
+            }
+            return b;
+        }
+
         function continuedFractionForSqrt(n) {
             n = BigInt(n);
             if (n < 0n) {
@@ -40,31 +65,6 @@
                     return {value: undefined, done: true};
                 }
             };
-        }
-
-        function sqrt(x) {
-            if (x < BigInt((Number.MAX_SAFE_INTEGER + 1) / 2)) {
-                return BigInt(Math.floor(Math.sqrt(Number(x) + 0.5)));
-            }
-            const q = (log2(x) / 4n);
-            const initialGuess = ((sqrt(x >> (q * 2n)) + 1n) << q);
-            let a = initialGuess, b = a + 1n;
-            while (a < b) {
-                b = a;
-                a = (b + x / b) / 2n;
-            }
-            return b;
-        }
-
-        function log2(x) {
-            return BigInt(x.toString(16).length * 4);
-        }
-
-        function gcd(a, b) {
-            while (b !== 0n) {
-                [a, b] = [b, a % b];
-            }
-            return a;
         }
 
         function ContinuedFractionFactorization(N) {
