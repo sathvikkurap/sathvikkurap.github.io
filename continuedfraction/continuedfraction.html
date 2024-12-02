@@ -90,7 +90,12 @@
         }
 
         function runContinuedFractionFactorization() {
-            let n = BigInt(document.getElementById('number').value);
+            let input = document.getElementById('number').value;
+            if (!Number.isInteger(Number(input))) {
+                document.getElementById('result').textContent = "Please enter an integer value.";
+                return;
+            }
+            let n = BigInt(input);
             let factor = ContinuedFractionFactorization(n);
             if (factor) {
                 document.getElementById('result').textContent = `Factors of ${n} are: ${factor} and ${n / factor}`;
