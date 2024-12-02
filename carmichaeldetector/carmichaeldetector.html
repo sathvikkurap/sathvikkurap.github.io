@@ -4,21 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carmichael Number Detector</title>
+    <script>
+        function modPow(base, exponent, modulus) {
+            if (modulus === 1) return 0;
+            let result = 1;
+            base = base % modulus;
+            while (exponent > 0) {
+                if (exponent % 2 === 1)
+                    result = (result * base) % modulus;
+                exponent = exponent >> 1;
+                base = (base * base) % modulus;
+            }
+            return result;
+        }
+
+        function isCarmichael(n) {
+            if (n < 2 || n % 2 === 0) return false;
+            for (let b = 2; b < n; b++) {
+                if (modPow(b, n, n) !== b) return false;
+            }
+            return true;
+        }
+
+        function checkCarmichael() {
+            let n = parseInt(document.getElementById('number').value);
+            let result = isCarmichael(n);
+            document.getElementById('result').textContent = result ? 
+                `${n} is a Carmichael number.` : 
+                `${n} is not a Carmichael number.`;
+        }
+    </script>
 </head>
 <body>
     <h1>Carmichael Number Detector</h1>
-    <p>This project implements an efficient algorithm to detect Carmichael numbers, which are composite numbers that satisfy certain properties similar to prime numbers.</p>
-    <h2>Key Features:</h2>
-    <ul>
-        <li>Efficient detection of Carmichael numbers</li>
-        <li>Implementation of modular exponentiation</li>
-        <li>Optimization for numbers up to one million</li>
-    </ul>
-    <h2>Example Usage:</h2>
-    <pre><code>
-for(let n = 2; n < 100000; n++) {
-    if(is_carmichael(n)) console.log(n);
-}
-    </code></pre>
+    <p>Enter a number to check if it's a Carmichael number:</p>
+    <input type="number" id="number" placeholder="Enter a number">
+    <button onclick="checkCarmichael()">Check</button>
+    <p id="result"></p>
 </body>
 </html>
