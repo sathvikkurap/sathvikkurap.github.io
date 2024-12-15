@@ -4,91 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ECC Shared Secret Generation</title>
+    <script src="https://cdn.jsdelivr.net/npm/elliptic@6.5.4/dist/elliptic.min.js"></script>
 </head>
 <body>
-    <h1>ECC Shared Secret Generation</h1>
-    <button onclick="generateSharedSecret()">Generate Shared Secret</button><br>
-    <textarea id="sharedSecret" rows="4" cols="50" readonly></textarea>
+    <h1>Elliptic Curve Cryptography Shared Secret Generation</h1>
+    <button onclick="generateSharedSecret()">Generate Shared Secret</button>
+    <div id="result"></div>
 
     <script>
-        // NIST P-256 curve parameters
-        const p = BigInt("0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF");
-        const a = BigInt("0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC");
-        const b = BigInt("0x5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B");
-        const G = {
-            x: BigInt("0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296"),
-            y: BigInt("0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5")
-        };
-        const n = BigInt("0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551");
-
-        function modInverse(a, m) {
-            let [old_r, r] = [a, m];
-            let [old_s, s] = [BigInt(1), BigInt(0)];
-            let [old_t, t] = [BigInt(0), BigInt(1)];
-
-            while (r !== BigInt(0)) {
-                const quotient = old_r / r;
-                [old_r, r] = [r, old_r - quotient * r];
-                [old_s, s] = [s, old_s - quotient * s];
-                [old_t, t] = [t, old_t - quotient * t];
-            }
-
-            return (old_s % m + m) % m;
-        }
-
-        function addPoints(P, Q) {
-            if (P === null) return Q;
-            if (Q === null) return P;
-
-            let m;
-            if (P.x === Q.x && P.y === Q.y) {
-                m = ((BigInt(3) * P.x * P.x + a) * modInverse(BigInt(2) * P.y, p)) % p;
-            } else {
-                m = ((Q.y - P.y) * modInverse(Q.x - P.x, p)) % p;
-            }
-
-            const x = (m * m - P.x - Q.x) % p;
-            const y = (m * (P.x - x) - P.y) % p;
-
-            return { x: (x + p) % p, y: (y + p) % p };
-        }
-
-        function multiplyPoint(k, P) {
-            let R = null;
-            let Q = P;
-
-            while (k > BigInt(0)) {
-                if (k & BigInt(1)) {
-                    R = addPoints(R, Q);
-                }
-                Q = addPoints(Q, Q);
-                k >>= BigInt(1);
-            }
-
-            return R;
-        }
-
-        function generateKeyPair() {
-            const privateKey = BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER));
-            const publicKey = multiplyPoint(privateKey, G);
-            return { privateKey, publicKey };
-        }
-
         function generateSharedSecret() {
-            const aliceKeyPair = generateKeyPair();
-            const bobKeyPair = generateKeyPair();
+            // Initialize the elliptic curve
+            const EC = elliptic.ec;
+            const ec = new EC('p256');
 
-            const aliceSharedSecret = multiplyPoint(aliceKeyPair.privateKey, bobKeyPair.publicKey);
-            const bobSharedSecret = multiplyPoint(bobKeyPair.privateKey, aliceKeyPair.publicKey);
+            // Generate key pairs for Alice and Bob
+            const aliceKeyPair = ec.genKeyPair();
+            const bobKeyPair = ec.genKeyPair();
 
-            // Verify that both parties compute the same shared secret
-            if (aliceSharedSecret.x === bobSharedSecret.x && aliceSharedSecret.y === bobSharedSecret.y) {
-                document.getElementById('sharedSecret').value = 
-                    `Shared Secret X: ${aliceSharedSecret.x.toString(16)}\n` +
-                    `Shared Secret Y: ${aliceSharedSecret.y.toString(16)}`;
-            } else {
-                document.getElementById('sharedSecret').value = "Error: Shared secrets do not match";
-            }
+            // Compute shared secrets
+            const aliceSharedSecret = aliceKeyPair.derive(bobKeyPair.getPublic());
+            const bobSharedSecret = bobKeyPair.derive(aliceKeyPair.getPublic());
+
+            // Convert shared secrets to hex strings
+            const aliceSharedSecretHex = aliceSharedSecret.toString(16);
+            const bobSharedSecretHex = bobSharedSecret.toString(16);
+
+            // Display the results
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <h2>Results:</h2>
+                <p><strong>Alice's Public Key:</strong> ${aliceKeyPair.getPublic().encode('hex')}</p>
+                <p><strong>Bob's Public Key:</strong> ${bobKeyPair.getPublic().encode('hex')}</p>
+                <p><strong>Alice's Shared Secret:</strong> ${aliceSharedSecretHex}</p>
+                <p><strong>Bob's Shared Secret:</strong> ${bobSharedSecretHex}</p>
+                <p><strong>Shared Secrets Match:</strong> ${aliceSharedSecretHex === bobSharedSecretHex ? 'Yes' : 'No'}</p>
+            `;
         }
     </script>
 </body>
