@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECC Message Encryption</title>
+    <title>ECC Shared Secret Generation</title>
 </head>
 <body>
-    <h1>ECC Message Encryption</h1>
-    <textarea id="message" rows="4" cols="50" placeholder="Enter your message"></textarea><br>
-    <button onclick="encryptMessage()">Encrypt</button><br>
-    <textarea id="encrypted" rows="4" cols="50" readonly></textarea>
+    <h1>ECC Shared Secret Generation</h1>
+    <button onclick="generateSharedSecret()">Generate Shared Secret</button><br>
+    <textarea id="sharedSecret" rows="4" cols="50" readonly></textarea>
 
     <script>
         // NIST P-256 curve parameters
@@ -75,30 +74,21 @@
             return { privateKey, publicKey };
         }
 
-        function sha256(message) {
-            const utf8 = new TextEncoder().encode(message);
-            return crypto.subtle.digest('SHA-256', utf8).then(hashBuffer => {
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            });
-        }
+        function generateSharedSecret() {
+            const aliceKeyPair = generateKeyPair();
+            const bobKeyPair = generateKeyPair();
 
-        async function encryptMessage() {
-            const message = document.getElementById('message').value;
-            const recipientKeyPair = generateKeyPair();
-            const senderKeyPair = generateKeyPair();
+            const aliceSharedSecret = multiplyPoint(aliceKeyPair.privateKey, bobKeyPair.publicKey);
+            const bobSharedSecret = multiplyPoint(bobKeyPair.privateKey, aliceKeyPair.publicKey);
 
-            const sharedSecret = multiplyPoint(senderKeyPair.privateKey, recipientKeyPair.publicKey);
-            const key = await sha256(sharedSecret.x.toString() + sharedSecret.y.toString());
-
-            const encryptedChars = message.split('').map(char => {
-                const charCode = char.charCodeAt(0);
-                const keyChar = key[charCode % key.length];
-                return String.fromCharCode(charCode ^ keyChar.charCodeAt(0));
-            });
-
-            const encrypted = btoa(encryptedChars.join(''));
-            document.getElementById('encrypted').value = encrypted;
+            // Verify that both parties compute the same shared secret
+            if (aliceSharedSecret.x === bobSharedSecret.x && aliceSharedSecret.y === bobSharedSecret.y) {
+                document.getElementById('sharedSecret').value = 
+                    `Shared Secret X: ${aliceSharedSecret.x.toString(16)}\n` +
+                    `Shared Secret Y: ${aliceSharedSecret.y.toString(16)}`;
+            } else {
+                document.getElementById('sharedSecret').value = "Error: Shared secrets do not match";
+            }
         }
     </script>
 </body>
