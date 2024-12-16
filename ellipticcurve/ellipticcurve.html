@@ -2,205 +2,74 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECC Encryption/Decryption</title>
+    <title>Simple ECC Encryption/Decryption</title>
+</head>
+<body>
+    <h1>ECC Encryption/Decryption Demo</h1>
+    <input type="text" id="message" placeholder="Enter message">
+    <button onclick="encryptAndDecrypt()">Encrypt and Decrypt</button>
+    <p>Encrypted: <span id="encrypted"></span></p>
+    <p>Decrypted: <span id="decrypted"></span></p>
+
     <script>
-        async function generateECDHKeys() {
-            const keyPair = await crypto.subtle.generateKey(
-                {
-                    name: "ECDH",
-                    namedCurve: "P-256"
-                },
-                true,
-                ["deriveKey", "deriveBits"]
-            );
-
-            const publicKey = await crypto.subtle.exportKey("raw", keyPair.publicKey);
-            return {
-                privateKey: keyPair.privateKey,
-                publicKey: publicKey
-            };
-        }
-
-        async function deriveSharedSecret(privateKey, publicKey) {
-            const importedPublicKey = await crypto.subtle.importKey(
-                "raw",
-                publicKey,
-                { name: "ECDH", namedCurve: "P-256" },
-                true,
-                []
-            );
-
-            return await crypto.subtle.deriveBits(
-                { name: "ECDH", public: importedPublicKey },
-                privateKey,
-                256
-            );
-        }
-
-        async function encryptMessage(sharedSecret, message) {
-            const encoder = new TextEncoder();
-            const encodedMessage = encoder.encode(message);
-
-            const key = await crypto.subtle.importKey(
-                "raw",
-                sharedSecret,
-                { name: "AES-GCM" },
-                false,
-                ["encrypt"]
-            );
-
-            const iv = crypto.getRandomValues(new Uint8Array(12)); // Generate a random IV
-            const encrypted = await crypto.subtle.encrypt(
-                { name: "AES-GCM", iv: iv },
-                key,
-                encodedMessage
-            );
-
-            return { iv: iv, ciphertext: new Uint8Array(encrypted) };
-        }
-
-        async function decryptMessage(sharedSecret, iv, ciphertext) {
-            const key = await crypto.subtle.importKey(
-                "raw",
-                sharedSecret,
-                { name: "AES-GCM" },
-                false,
-                ["decrypt"]
-            );
-
-            const decrypted = await crypto.subtle.decrypt(
-                { name: "AES-GCM", iv: iv },
-                key,
-                ciphertext
-            );
-
-            const decoder = new TextDecoder();
-            return decoder.decode(decrypted);
-        }
-
-        function validateInput(message) {
-            if (!message) {
-                alert('Please enter a message to encrypt.');
-                return false;
-            }
-            return true;
-        }
-
-        async function encryptMessageWithValidation() {
+        async function encryptAndDecrypt() {
             const message = document.getElementById('message').value;
-            if (!validateInput(message)) return;
-            try {
-                const aliceKeys = await generateECDHKeys();
-                const bobKeys = await generateECDHKeys();
-
-                // Derive shared secret from Alice's private key and Bob's public key
-                const sharedSecret = await deriveSharedSecret(aliceKeys.privateKey, bobKeys.publicKey);
-                
-                // Encrypt the message using the shared secret
-                const { iv, ciphertext } = await encryptMessage(sharedSecret, message);
-
-                // Combine IV and ciphertext for storage/transmission
-                const encryptedData = new Uint8Array(iv.length + ciphertext.length);
-                encryptedData.set(iv);
-                encryptedData.set(ciphertext, iv.length);
-
-                document.getElementById('encryptedMessage').textContent = btoa(String.fromCharCode.apply(null, encryptedData));
-                
-                // Display keys in Base64 format
-                document.getElementById('publicKey').textContent = btoa(String.fromCharCode.apply(null, new Uint8Array(aliceKeys.publicKey)));
-                document.getElementById('privateKey').textContent = btoa(String.fromCharCode.apply(null, new Uint8Array(await crypto.subtle.exportKey("raw", aliceKeys.privateKey))));
-                
-            } catch (error) {
-                console.error('Encryption failed:', error);
-                alert('Encryption failed. Please try again.');
-            }
-        }
-
-        async function decryptMessageWithValidation() {
-            const encryptedMessage = document.getElementById('encryptedMessage').textContent;
-            const privateKeyBase64 = document.getElementById('privateKey').textContent;
-
-            if (!encryptedMessage || !privateKeyBase64) {
-                alert('Please encrypt a message first.');
+            if (!message) {
+                alert('Please enter a message');
                 return;
             }
 
             try {
-                // Decode the Base64 encoded keys and message
-                const encryptedData = Uint8Array.from(atob(encryptedMessage), c => c.charCodeAt(0));
-                
-                // Extract IV and ciphertext
-                const iv = encryptedData.slice(0, 12); // First 12 bytes are IV
-                const ciphertext = encryptedData.slice(12); // Remaining bytes are ciphertext
-
-                // Import the private key from Base64
-                const privateKey = await crypto.subtle.importKey(
-                    "raw",
-                    Uint8Array.from(atob(privateKeyBase64), c => c.charCodeAt(0)),
+                // Generate ECC key pair
+                const keyPair = await window.crypto.subtle.generateKey(
                     { name: "ECDH", namedCurve: "P-256" },
                     true,
-                    []
+                    ["deriveKey", "deriveBits"]
                 );
 
-               // Derive the shared secret again for decryption (assuming Bob's public key is known)
-               const sharedSecret = await deriveSharedSecret(privateKey, document.getElementById('publicKey').textContent);
+                // Export public key
+                const publicKey = await window.crypto.subtle.exportKey("raw", keyPair.publicKey);
 
-               // Decrypt the message using the shared secret
-               const decryptedMessage = await decryptMessage(sharedSecret, iv, ciphertext);
-               
-               document.getElementById('decryptedMessage').textContent = decryptedMessage;
+                // Derive bits (simulating shared secret)
+                const bits = await window.crypto.subtle.deriveBits(
+                    { name: "ECDH", public: keyPair.publicKey },
+                    keyPair.privateKey,
+                    256
+                );
 
-           } catch (error) {
-               console.error('Decryption failed:', error);
-               alert('Decryption failed. Please try again.');
-           }
-       }
+                // Use derived bits as key for AES-GCM
+                const key = await window.crypto.subtle.importKey(
+                    "raw",
+                    bits,
+                    { name: "AES-GCM" },
+                    false,
+                    ["encrypt", "decrypt"]
+                );
 
-       function setupUI() {
-           const messageInput = document.createElement('input');
-           messageInput.type = 'text';
-           messageInput.id = 'message';
-           messageInput.placeholder = 'Enter message to encrypt';
+                // Encrypt
+                const encodedMessage = new TextEncoder().encode(message);
+                const iv = window.crypto.getRandomValues(new Uint8Array(12));
+                const encrypted = await window.crypto.subtle.encrypt(
+                    { name: "AES-GCM", iv: iv },
+                    key,
+                    encodedMessage
+                );
 
-           const encryptButton = document.createElement('button');
-           encryptButton.textContent = 'Encrypt';
-           encryptButton.onclick = encryptMessageWithValidation;
+                // Decrypt
+                const decrypted = await window.crypto.subtle.decrypt(
+                    { name: "AES-GCM", iv: iv },
+                    key,
+                    encrypted
+                );
 
-           const decryptButton = document.createElement('button');
-           decryptButton.textContent = 'Decrypt';
-           decryptButton.onclick = decryptMessageWithValidation;
-
-           const encryptedMessageDisplay = document.createElement('p');
-           encryptedMessageDisplay.id = 'encryptedMessage';
-
-           const decryptedMessageDisplay = document.createElement('p');
-           decryptedMessageDisplay.id = 'decryptedMessage';
-
-           const publicKeyDisplay = document.createElement('p');
-           publicKeyDisplay.id = 'publicKey';
-
-           const privateKeyDisplay = document.createElement('p');
-           privateKeyDisplay.id = 'privateKey';
-
-           document.body.appendChild(messageInput);
-           document.body.appendChild(encryptButton);
-           document.body.appendChild(decryptButton);
-           document.body.appendChild(document.createElement('hr'));
-           document.body.appendChild(document.createTextNode('Encrypted Message: '));
-           document.body.appendChild(encryptedMessageDisplay);
-           document.body.appendChild(document.createTextNode('Decrypted Message: '));
-           document.body.appendChild(decryptedMessageDisplay);
-           document.body.appendChild(document.createTextNode('Public Key: '));
-           document.body.appendChild(publicKeyDisplay);
-           document.body.appendChild(document.createTextNode('Private Key: '));
-           document.body.appendChild(privateKeyDisplay);
-       }
-
-       window.onload = setupUI;
+                // Display results
+                document.getElementById('encrypted').textContent = btoa(String.fromCharCode.apply(null, new Uint8Array(encrypted)));
+                document.getElementById('decrypted').textContent = new TextDecoder().decode(decrypted);
+            } catch (error) {
+                console.error('Operation failed:', error);
+                alert('Operation failed. See console for details.');
+            }
+        }
     </script>
-</head>
-<body>
-    <h1>ECC Encryption/Decryption Demo</h1>
 </body>
 </html>
