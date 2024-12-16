@@ -6,36 +6,57 @@
     <title>Pollard's Rho Algorithm</title>
     <script>
         function gcd(a, b) {
-            if (b === 0) return a;
-            return gcd(b, a % b);
+            while (b !== 0) {
+                let t = b;
+                b = a % b;
+                a = t;
+            }
+            return a;
         }
 
         function pollardRho(n) {
             if (n % 2 === 0) return 2;
-            
-            let x = 2, y = 2, d = 1;
-            let f = (x) => (BigInt(x) * BigInt(x) + BigInt(1)) % BigInt(n);
-            
+
+            let x = 2;
+            let y = 2;
+            let d = 1;
+
+            function f(x) {
+                return (BigInt(x) * BigInt(x) + BigInt(1)) % BigInt(n);
+            }
+
             while (d === 1) {
                 x = f(x);
                 y = f(f(y));
                 d = gcd(Math.abs(x - y), n);
             }
+
             return d;
         }
 
-        function runPollardRho() {
-            let n = BigInt(document.getElementById('number').value);
-            let result = pollardRho(n);
-            document.getElementById('result').textContent = `One of the divisors for ${n} is ${result}`;
+        function factor() {
+            const input = document.getElementById('number').value;
+            const n = parseInt(input);
+
+            if (isNaN(n) || n < 2) {
+                document.getElementById('result').textContent = "Please enter a valid number greater than 1.";
+                return;
+            }
+
+            const factor = pollardRho(n);
+
+            if (factor === n) {
+                document.getElementById('result').textContent = `${n} is prime or the algorithm failed to find a factor.`;
+            } else {
+                document.getElementById('result').textContent = `A factor of ${n} is ${factor}.`;
+            }
         }
     </script>
 </head>
 <body>
-    <h1>Pollard's Rho Algorithm Implementation</h1>
-    <p>Enter a number to factorize:</p>
-    <input type="number" id="number" placeholder="Enter a number">
-    <button onclick="runPollardRho()">Factorize</button>
+    <h1>Pollard's Rho Algorithm for Factoring</h1>
+    <input type="number" id="number" placeholder="Enter a number to factor">
+    <button onclick="factor()">Factor</button>
     <p id="result"></p>
 </body>
 </html>
