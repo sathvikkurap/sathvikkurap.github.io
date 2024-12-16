@@ -3,32 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carmichael Number Detector</title>
+    <title>Carmichael Number Checker</title>
     <script>
+        function gcd(a, b) {
+            while (b !== 0n) {
+                let t = b;
+                b = a % b;
+                a = t;
+            }
+            return a;
+        }
+
         function modPow(base, exponent, modulus) {
-            if (modulus === 1) return 0;
-            let result = 1;
+            if (modulus === 1n) return 0n;
+            let result = 1n;
             base = base % modulus;
-            while (exponent > 0) {
-                if (exponent % 2 === 1)
+            while (exponent > 0n) {
+                if (exponent % 2n === 1n) {
                     result = (result * base) % modulus;
-                exponent = exponent >> 1;
+                }
+                exponent = exponent / 2n;
                 base = (base * base) % modulus;
             }
             return result;
         }
 
         function isCarmichael(n) {
-            if (n < 2 || n % 2 === 0) return false;
-            for (let b = 2; b < n; b++) {
-                if (modPow(b, n, n) !== b) return false;
+            if (n <= 2n || n % 2n === 0n) return false;
+
+            for (let a = 2n; a < n; a++) {
+                if (gcd(a, n) === 1n) {
+                    if (modPow(a, n - 1n, n) !== 1n) {
+                        return false;
+                    }
+                }
             }
-            return true;
+            
+            // Check if n is composite
+            for (let i = 2n; i * i <= n; i++) {
+                if (n % i === 0n) return true;
+            }
+            
+            return false; // n is prime
         }
 
-        function checkCarmichael() {
-            let n = parseInt(document.getElementById('number').value);
-            let result = isCarmichael(n);
+        function checkNumber() {
+            const input = document.getElementById('number').value;
+            const n = BigInt(input);
+            const result = isCarmichael(n);
             document.getElementById('result').textContent = result ? 
                 `${n} is a Carmichael number.` : 
                 `${n} is not a Carmichael number.`;
@@ -36,10 +58,9 @@
     </script>
 </head>
 <body>
-    <h1>Carmichael Number Detector</h1>
-    <p>Enter a number to check if it's a Carmichael number:</p>
-    <input type="number" id="number" placeholder="Enter a number">
-    <button onclick="checkCarmichael()">Check</button>
+    <h1>Carmichael Number Checker</h1>
+    <input type="text" id="number" placeholder="Enter a number">
+    <button onclick="checkNumber()">Check</button>
     <p id="result"></p>
 </body>
 </html>
