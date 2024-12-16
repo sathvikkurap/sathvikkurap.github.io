@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pollard's Rho Algorithm</title>
+    <title>Pollard's Rho Algorithm (BigInt)</title>
     <script>
         function gcd(a, b) {
-            while (b !== 0) {
+            a = BigInt(a);
+            b = BigInt(b);
+            while (b !== 0n) {
                 let t = b;
                 b = a % b;
                 a = t;
@@ -14,21 +16,26 @@
             return a;
         }
 
-        function pollardRho(n) {
-            if (n % 2 === 0) return 2;
+        function abs(n) {
+            return n < 0n ? -n : n;
+        }
 
-            let x = 2;
-            let y = 2;
-            let d = 1;
+        function pollardRho(n) {
+            n = BigInt(n);
+            if (n % 2n === 0n) return 2n;
+
+            let x = 2n;
+            let y = 2n;
+            let d = 1n;
 
             function f(x) {
-                return (BigInt(x) * BigInt(x) + BigInt(1)) % BigInt(n);
+                return (x * x + 1n) % n;
             }
 
-            while (d === 1) {
+            while (d === 1n) {
                 x = f(x);
                 y = f(f(y));
-                d = gcd(Math.abs(x - y), n);
+                d = gcd(abs(x - y), n);
             }
 
             return d;
@@ -36,10 +43,16 @@
 
         function factor() {
             const input = document.getElementById('number').value;
-            const n = parseInt(input);
+            let n;
+            try {
+                n = BigInt(input);
+            } catch (e) {
+                document.getElementById('result').textContent = "Please enter a valid number.";
+                return;
+            }
 
-            if (isNaN(n) || n < 2) {
-                document.getElementById('result').textContent = "Please enter a valid number greater than 1.";
+            if (n < 2n) {
+                document.getElementById('result').textContent = "Please enter a number greater than 1.";
                 return;
             }
 
@@ -54,8 +67,8 @@
     </script>
 </head>
 <body>
-    <h1>Pollard's Rho Algorithm for Factoring</h1>
-    <input type="number" id="number" placeholder="Enter a number to factor">
+    <h1>Pollard's Rho Algorithm for Factoring (BigInt)</h1>
+    <input type="text" id="number" placeholder="Enter a number to factor">
     <button onclick="factor()">Factor</button>
     <p id="result"></p>
 </body>
