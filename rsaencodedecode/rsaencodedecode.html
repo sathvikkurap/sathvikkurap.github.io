@@ -3,61 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RSA Encryption/Decryption Tool</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        #result { margin-top: 10px; color: green; font-weight: bold; }
-    </style>
-</head>
-<body>
-    <h1>RSA Encryption/Decryption Tool</h1>
-    <label for="pInput">Enter prime p:</label>
-    <input type="number" id="pInput" placeholder="Enter p" required>
-    <label for="qInput">Enter prime q:</label>
-    <input type="number" id="qInput" placeholder="Enter q" required>
-    <label for="eInput">Enter public exponent e:</label>
-    <input type="number" id="eInput" placeholder="Enter e" required>
-    <label for="messageInput">Enter message (number):</label>
-    <input type="number" id="messageInput" placeholder="Enter message" required>
-    <button onclick="encrypt()">Encrypt</button>
-    <button onclick="decrypt()">Decrypt</button>
-    <div id="result"></div>
-
+    <title>RSA Encryption/Decryption</title>
     <script>
         function modPow(base, exponent, modulus) {
-            let result = 1;
+            if (modulus === 1n) return 0n;
+            let result = 1n;
             base = base % modulus;
-            while (exponent > 0) {
-                if (exponent % 2 === 1)
+            while (exponent > 0n) {
+                if (exponent % 2n === 1n) {
                     result = (result * base) % modulus;
-                exponent = Math.floor(exponent / 2);
+                }
+                exponent = exponent / 2n;
                 base = (base * base) % modulus;
             }
             return result;
         }
 
-        function encrypt() {
-            const p = parseInt(document.getElementById('pInput').value);
-            const q = parseInt(document.getElementById('qInput').value);
-            const e = parseInt(document.getElementById('eInput').value);
-            const m = parseInt(document.getElementById('messageInput').value);
+        function generateKeys() {
+            const p = 61n;
+            const q = 53n;
             const n = p * q;
-            const c = modPow(m, e, n);
-            document.getElementById('result').textContent = `Encrypted message: ${c}`;
+            const phi = (p - 1n) * (q - 1n);
+            const e = 17n; // Common choice for e
+            let d = 1n;
+            while (((d * e) % phi) !== 1n) {
+                d += 1n;
+            }
+            document.getElementById('publicKey').textContent = `(${e}, ${n})`;
+            document.getElementById('privateKey').textContent = `(${d}, ${n})`;
+        }
+
+        function encrypt() {
+            const message = BigInt(document.getElementById('message').value);
+            const [e, n] = document.getElementById('publicKey').textContent
+                .slice(1, -1).split(', ').map(BigInt);
+            const encrypted = modPow(message, e, n);
+            document.getElementById('encrypted').textContent = encrypted.toString();
         }
 
         function decrypt() {
-            const p = parseInt(document.getElementById('pInput').value);
-            const q = parseInt(document.getElementById('qInput').value);
-            const e = parseInt(document.getElementById('eInput').value);
-            const c = parseInt(document.getElementById('messageInput').value);
-            const n = p * q;
-            const phi = (p - 1) * (q - 1);
-            let d = 1;
-            while ((d * e) % phi !== 1) d++;
-            const m = modPow(c, d, n);
-            document.getElementById('result').textContent = `Decrypted message: ${m}`;
+            const ciphertext = BigInt(document.getElementById('encrypted').textContent);
+            const [d, n] = document.getElementById('privateKey').textContent
+                .slice(1, -1).split(', ').map(BigInt);
+            const decrypted = modPow(ciphertext, d, n);
+            document.getElementById('decrypted').textContent = decrypted.toString();
         }
     </script>
+</head>
+<body>
+    <h1>RSA Encryption/Decryption</h1>
+    
+    <button onclick="generateKeys()">Generate Keys</button>
+    <p>Public Key: <span id="publicKey"></span></p>
+    <p>Private Key: <span id="privateKey"></span></p>
+    
+    <h2>Encryption</h2>
+    <input type="number" id="message" placeholder="Enter a number to encrypt">
+    <button onclick="encrypt()">Encrypt</button>
+    <p>Encrypted: <span id="encrypted"></span></p>
+    
+    <h2>Decryption</h2>
+    <button onclick="decrypt()">Decrypt</button>
+    <p>Decrypted: <span id="decrypted"></span></p>
 </body>
 </html>
