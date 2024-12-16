@@ -3,43 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECC Shared Secret Generation</title>
-    <script src="https://cdn.jsdelivr.net/npm/elliptic@6.5.4/dist/elliptic.min.js"></script>
-</head>
-<body>
-    <h1>Elliptic Curve Cryptography Shared Secret Generation</h1>
-    <button onclick="generateSharedSecret()">Generate Shared Secret</button>
-    <div id="result"></div>
-
+    <title>ECDH Key Exchange</title>
     <script>
-        function generateSharedSecret() {
-            // Initialize the elliptic curve
-            const EC = elliptic.ec;
-            const ec = new EC('p256');
+        async function generateSharedSecret() {
+            // Generate key pairs for two parties
+            const aliceKeyPair = await crypto.subtle.generateKey({
+                name: "ECDH",
+                namedCurve: "P-256"
+            }, true, ["deriveKey"]);
 
-            // Generate key pairs for Alice and Bob
-            const aliceKeyPair = ec.genKeyPair();
-            const bobKeyPair = ec.genKeyPair();
+            const bobKeyPair = await crypto.subtle.generateKey({
+                name: "ECDH",
+                namedCurve: "P-256"
+            }, true, ["deriveKey"]);
 
-            // Compute shared secrets
-            const aliceSharedSecret = aliceKeyPair.derive(bobKeyPair.getPublic());
-            const bobSharedSecret = bobKeyPair.derive(aliceKeyPair.getPublic());
+            // Export Bob's public key
+            const bobPublicKey = await crypto.subtle.exportKey("raw", bobKeyPair.publicKey);
 
-            // Convert shared secrets to hex strings
-            const aliceSharedSecretHex = aliceSharedSecret.toString(16);
-            const bobSharedSecretHex = bobSharedSecret.toString(16);
+            // Derive shared secret using Alice's private key and Bob's public key
+            const sharedSecret = await crypto.subtle.deriveKey({
+                name: "ECDH",
+                namedCurve: "P-256",
+                public: await crypto.subtle.importKey(
+                    "raw",
+                    bobPublicKey,
+                    { name: "ECDH", namedCurve: "P-256" },
+                    true,
+                    []
+                )
+            }, aliceKeyPair.privateKey, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
 
-            // Display the results
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = `
-                <h2>Results:</h2>
-                <p><strong>Alice's Public Key:</strong> ${aliceKeyPair.getPublic().encode('hex')}</p>
-                <p><strong>Bob's Public Key:</strong> ${bobKeyPair.getPublic().encode('hex')}</p>
-                <p><strong>Alice's Shared Secret:</strong> ${aliceSharedSecretHex}</p>
-                <p><strong>Bob's Shared Secret:</strong> ${bobSharedSecretHex}</p>
-                <p><strong>Shared Secrets Match:</strong> ${aliceSharedSecretHex === bobSharedSecretHex ? 'Yes' : 'No'}</p>
-            `;
+            console.log('Shared secret generated successfully');
         }
     </script>
+</head>
+<body>
+    <h1>Elliptic Curve Diffie-Hellman Key Exchange</h1>
+    <button onclick="generateSharedSecret()">Generate Shared Secret</button>
 </body>
 </html>
