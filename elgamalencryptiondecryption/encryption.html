@@ -3,61 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ElGamal Encryption/Decryption Tool</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        #result { margin-top: 10px; color: green; font-weight: bold; }
-    </style>
-</head>
-<body>
-    <h1>ElGamal Encryption/Decryption Tool</h1>
-    <label for="pInput">Enter prime p:</label>
-    <input type="number" id="pInput" placeholder="Enter p" required>
-    <label for="gInput">Enter generator g:</label>
-    <input type="number" id="gInput" placeholder="Enter g" required>
-    <label for="xInput">Enter private key x:</label>
-    <input type="number" id="xInput" placeholder="Enter x" required>
-    <label for="messageInput">Enter message (number):</label>
-    <input type="number" id="messageInput" placeholder="Enter message" required>
-    <button onclick="encrypt()">Encrypt</button>
-    <button onclick="decrypt()">Decrypt</button>
-    <div id="result"></div>
-
+    <title>ElGamal Cryptosystem</title>
     <script>
         function modPow(base, exponent, modulus) {
-            let result = 1;
+            if (modulus === 1n) return 0n;
+            let result = 1n;
             base = base % modulus;
-            while (exponent > 0) {
-                if (exponent % 2 === 1)
+            while (exponent > 0n) {
+                if (exponent % 2n === 1n) {
                     result = (result * base) % modulus;
-                exponent = Math.floor(exponent / 2);
+                }
+                exponent = exponent / 2n;
                 base = (base * base) % modulus;
             }
             return result;
         }
 
+        function generateKeys() {
+            const p = 23n; // A small prime for demonstration
+            const g = 5n;  // A generator of the multiplicative group modulo p
+            const x = 6n;  // Private key (usually randomly generated)
+            const y = modPow(g, x, p); // Public key
+
+            document.getElementById('publicKey').textContent = `p: ${p}, g: ${g}, y: ${y}`;
+            document.getElementById('privateKey').textContent = `x: ${x}`;
+        }
+
         function encrypt() {
-            const p = parseInt(document.getElementById('pInput').value);
-            const g = parseInt(document.getElementById('gInput').value);
-            const x = parseInt(document.getElementById('xInput').value);
-            const m = parseInt(document.getElementById('messageInput').value);
-            const h = modPow(g, x, p);
-            const k = 2 + Math.floor(Math.random() * (p - 3));
+            const message = BigInt(document.getElementById('message').value);
+            const [p, g, y] = document.getElementById('publicKey').textContent
+                .split(', ').map(pair => BigInt(pair.split(': ')[1]));
+            
+            const k = 3n; // Usually randomly generated for each message
             const c1 = modPow(g, k, p);
-            const c2 = (m * modPow(h, k, p)) % p;
-            document.getElementById('result').textContent = `Encrypted message: (${c1}, ${c2})`;
+            const s = modPow(y, k, p);
+            const c2 = (message * s) % p;
+
+            document.getElementById('encrypted').textContent = `(${c1}, ${c2})`;
         }
 
         function decrypt() {
-            const p = parseInt(document.getElementById('pInput').value);
-            const x = parseInt(document.getElementById('xInput').value);
-            const input = document.getElementById('messageInput').value.split(',');
-            const c1 = parseInt(input[0]);
-            const c2 = parseInt(input[1]);
+            const [c1, c2] = document.getElementById('encrypted').textContent
+                .slice(1, -1).split(', ').map(BigInt);
+            const [p] = document.getElementById('publicKey').textContent
+                .split(', ').map(pair => BigInt(pair.split(': ')[1]));
+            const x = BigInt(document.getElementById('privateKey').textContent.split(': ')[1]);
+
             const s = modPow(c1, x, p);
-            const m = (c2 * modPow(s, p - 2, p)) % p;
-            document.getElementById('result').textContent = `Decrypted message: ${m}`;
+            const sInverse = modPow(s, p - 2n, p); // Modular multiplicative inverse
+            const decrypted = (c2 * sInverse) % p;
+
+            document.getElementById('decrypted').textContent = decrypted.toString();
         }
     </script>
+</head>
+<body>
+    <h1>ElGamal Cryptosystem</h1>
+    
+    <button onclick="generateKeys()">Generate Keys</button>
+    <p>Public Key: <span id="publicKey"></span></p>
+    <p>Private Key: <span id="privateKey"></span></p>
+    
+    <h2>Encryption</h2>
+    <input type="number" id="message" placeholder="Enter a number to encrypt">
+    <button onclick="encrypt()">Encrypt</button>
+    <p>Encrypted: <span id="encrypted"></span></p>
+    
+    <h2>Decryption</h2>
+    <button onclick="decrypt()">Decrypt</button>
+    <p>Decrypted: <span id="decrypted"></span></p>
 </body>
 </html>
