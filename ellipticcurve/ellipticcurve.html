@@ -2,73 +2,164 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Simple ECC Encryption/Decryption</title>
+    <title>Advanced ECC Encryption/Decryption</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .key-display { word-break: break-all; font-size: 0.8em; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
 </head>
 <body>
-    <h1>ECC Encryption/Decryption Demo</h1>
-    <input type="text" id="message" placeholder="Enter message">
-    <button onclick="encryptAndDecrypt()">Encrypt and Decrypt</button>
-    <p>Encrypted: <span id="encrypted"></span></p>
-    <p>Decrypted: <span id="decrypted"></span></p>
+    <h1>Advanced ECC Encryption/Decryption Demo</h1>
+    <div>
+        <h2>Key Generation</h2>
+        <button onclick="generateAndDisplayKeys()">Generate New Key Pair</button>
+        <p>Public Key: <span id="publicKey" class="key-display"></span></p>
+        <p>Private Key: <span id="privateKey" class="key-display"></span></p>
+    </div>
+    <div>
+        <h2>Encryption</h2>
+        <textarea id="message" rows="4" cols="50" placeholder="Enter message to encrypt"></textarea><br>
+        <button onclick="encryptMessage()">Encrypt</button>
+        <p>Encrypted: <span id="encrypted" class="key-display"></span></p>
+    </div>
+    <div>
+        <h2>Decryption</h2>
+        <textarea id="encryptedInput" rows="4" cols="50" placeholder="Enter encrypted message to decrypt"></textarea><br>
+        <button onclick="decryptMessage()">Decrypt</button>
+        <p>Decrypted: <span id="decrypted"></span></p>
+    </div>
+    <div id="status"></div>
 
     <script>
-        async function encryptAndDecrypt() {
-            const message = document.getElementById('message').value;
-            if (!message) {
-                alert('Please enter a message');
-                return;
-            }
+        let keyPair = null;
 
+        async function generateAndDisplayKeys() {
             try {
-                // Generate ECC key pair
-                const keyPair = await window.crypto.subtle.generateKey(
+                keyPair = await window.crypto.subtle.generateKey(
                     { name: "ECDH", namedCurve: "P-256" },
                     true,
                     ["deriveKey", "deriveBits"]
                 );
 
-                // Export public key
                 const publicKey = await window.crypto.subtle.exportKey("raw", keyPair.publicKey);
+                const privateKey = await window.crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
 
-                // Derive bits (simulating shared secret)
-                const bits = await window.crypto.subtle.deriveBits(
-                    { name: "ECDH", public: keyPair.publicKey },
-                    keyPair.privateKey,
-                    256
-                );
+                document.getElementById('publicKey').textContent = bufferToBase64(publicKey);
+                document.getElementById('privateKey').textContent = bufferToBase64(privateKey);
 
-                // Use derived bits as key for AES-GCM
-                const key = await window.crypto.subtle.importKey(
-                    "raw",
-                    bits,
-                    { name: "AES-GCM" },
-                    false,
-                    ["encrypt", "decrypt"]
-                );
-
-                // Encrypt
-                const encodedMessage = new TextEncoder().encode(message);
-                const iv = window.crypto.getRandomValues(new Uint8Array(12));
-                const encrypted = await window.crypto.subtle.encrypt(
-                    { name: "AES-GCM", iv: iv },
-                    key,
-                    encodedMessage
-                );
-
-                // Decrypt
-                const decrypted = await window.crypto.subtle.decrypt(
-                    { name: "AES-GCM", iv: iv },
-                    key,
-                    encrypted
-                );
-
-                // Display results
-                document.getElementById('encrypted').textContent = btoa(String.fromCharCode.apply(null, new Uint8Array(encrypted)));
-                document.getElementById('decrypted').textContent = new TextDecoder().decode(decrypted);
+                updateStatus("Keys generated successfully", true);
             } catch (error) {
-                console.error('Operation failed:', error);
-                alert('Operation failed. See console for details.');
+                console.error('Key generation failed:', error);
+                updateStatus("Key generation failed", false);
             }
+        }
+
+        async function encryptMessage() {
+            if (!keyPair) {
+                updateStatus("Please generate keys first", false);
+                return;
+            }
+
+            const message = document.getElementById('message').value;
+            if (!message) {
+                updateStatus("Please enter a message to encrypt", false);
+                return;
+            }
+
+            try {
+                const derivedBits = await performECDH(keyPair.publicKey, keyPair.privateKey);
+                const key = await deriveAESKey(derivedBits);
+                const encrypted = await encryptWithAESGCM(key, message);
+                document.getElementById('encrypted').textContent = bufferToBase64(encrypted);
+                updateStatus("Message encrypted successfully", true);
+            } catch (error) {
+                console.error('Encryption failed:', error);
+                updateStatus("Encryption failed", false);
+            }
+        }
+
+        async function decryptMessage() {
+            if (!keyPair) {
+                updateStatus("Please generate keys first", false);
+                return;
+            }
+
+            const encryptedMessage = document.getElementById('encryptedInput').value;
+            if (!encryptedMessage) {
+                updateStatus("Please enter an encrypted message to decrypt", false);
+                return;
+            }
+
+            try {
+                const derivedBits = await performECDH(keyPair.publicKey, keyPair.privateKey);
+                const key = await deriveAESKey(derivedBits);
+                const decrypted = await decryptWithAESGCM(key, base64ToBuffer(encryptedMessage));
+                document.getElementById('decrypted').textContent = decrypted;
+                updateStatus("Message decrypted successfully", true);
+            } catch (error) {
+                console.error('Decryption failed:', error);
+                updateStatus("Decryption failed", false);
+            }
+        }
+
+        async function performECDH(publicKey, privateKey) {
+            return await window.crypto.subtle.deriveBits(
+                { name: "ECDH", public: publicKey },
+                privateKey,
+                256
+            );
+        }
+
+        async function deriveAESKey(bits) {
+            return await window.crypto.subtle.importKey(
+                "raw",
+                bits,
+                { name: "AES-GCM", length: 256 },
+                false,
+                ["encrypt", "decrypt"]
+            );
+        }
+
+        async function encryptWithAESGCM(key, message) {
+            const encodedMessage = new TextEncoder().encode(message);
+            const iv = window.crypto.getRandomValues(new Uint8Array(12));
+            const encrypted = await window.crypto.subtle.encrypt(
+                { name: "AES-GCM", iv: iv },
+                key,
+                encodedMessage
+            );
+            const result = new Uint8Array(iv.length + encrypted.byteLength);
+            result.set(iv);
+            result.set(new Uint8Array(encrypted), iv.length);
+            return result;
+        }
+
+        async function decryptWithAESGCM(key, encryptedData) {
+            const iv = encryptedData.slice(0, 12);
+            const data = encryptedData.slice(12);
+            const decrypted = await window.crypto.subtle.decrypt(
+                { name: "AES-GCM", iv: iv },
+                key,
+                data
+            );
+            return new TextDecoder().decode(decrypted);
+        }
+
+        function bufferToBase64(buffer) {
+            return btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)));
+        }
+
+        function base64ToBuffer(base64) {
+            const binaryString = atob(base64);
+            return Uint8Array.from(binaryString, char => char.charCodeAt(0));
+        }
+
+        function updateStatus(message, isSuccess) {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = isSuccess ? 'success' : 'error';
         }
     </script>
 </body>
