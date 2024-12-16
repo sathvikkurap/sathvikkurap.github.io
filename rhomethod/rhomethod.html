@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pollard's Rho Algorithm (BigInt)</title>
+    <title>Pollard's Rho Algorithm (BigInt with Cycle Limit)</title>
     <script>
         function gcd(a, b) {
             a = BigInt(a);
@@ -20,22 +20,24 @@
             return n < 0n ? -n : n;
         }
 
-        function pollardRho(n) {
+        function pollardRho(n, maxCycles = 1000000) {
             n = BigInt(n);
             if (n % 2n === 0n) return 2n;
 
             let x = 2n;
             let y = 2n;
             let d = 1n;
+            let cycles = 0;
 
             function f(x) {
                 return (x * x + 1n) % n;
             }
 
-            while (d === 1n) {
+            while (d === 1n && cycles < maxCycles) {
                 x = f(x);
                 y = f(f(y));
                 d = gcd(abs(x - y), n);
+                cycles++;
             }
 
             return d;
@@ -56,18 +58,21 @@
                 return;
             }
 
+            const startTime = performance.now();
             const factor = pollardRho(n);
+            const endTime = performance.now();
+            const duration = (endTime - startTime).toFixed(2);
 
             if (factor === n) {
-                document.getElementById('result').textContent = `${n} is prime or the algorithm failed to find a factor.`;
+                document.getElementById('result').textContent = `${n} is probably prime or the algorithm failed to find a factor. (Time: ${duration} ms)`;
             } else {
-                document.getElementById('result').textContent = `A factor of ${n} is ${factor}.`;
+                document.getElementById('result').textContent = `A factor of ${n} is ${factor}. (Time: ${duration} ms)`;
             }
         }
     </script>
 </head>
 <body>
-    <h1>Pollard's Rho Algorithm for Factoring (BigInt)</h1>
+    <h1>Pollard's Rho Algorithm for Factoring (BigInt with Cycle Limit)</h1>
     <input type="text" id="number" placeholder="Enter a number to factor">
     <button onclick="factor()">Factor</button>
     <p id="result"></p>
