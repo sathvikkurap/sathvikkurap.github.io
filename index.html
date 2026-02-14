@@ -1,11 +1,11 @@
 ---
 layout: minimal
-title: Sathvik Kurapati
+title: Sathvik (Andy) Kurapati
 subtitle: 16-Year-Old Entrepreneur & Software Engineer
 ---
 
 <div class="introduction">
-  <h1>Sathvik Kurapati</h1>
+  <h1>Sathvik (Andy) Kurapati</h1>
   <p class="intro-text">
     I'm a <strong>16-year-old college student</strong> at the University of Washington, pursuing Computer Science and Mathematics. 
     As a young entrepreneur and software engineer, I've achieved remarkable milestones including securing 
@@ -13,10 +13,10 @@ subtitle: 16-Year-Old Entrepreneur & Software Engineer
     for satellite systems, and developing open-source software with over <strong>100k+ downloads</strong>.
   </p>
   <div class="links">
-    <a href="https://ieeexplore.ieee.org/document/11086324" class="link-button">IEEE Publication</a>
-    <a href="https://github.com/duckdb/duckdb/tree/main/extension/snowflake" class="link-button">DuckDB Extension</a>
     <a href="https://www.linkedin.com/in/sathvikkurapati" class="link-button">LinkedIn</a>
     <a href="https://github.com/sathvikkurap" class="link-button">GitHub</a>
+    <a href="https://ieeexplore.ieee.org/document/11086324" class="link-button">IEEE Publication</a>
+    <a href="https://github.com/duckdb/duckdb/tree/main/extension/snowflake" class="link-button">DuckDB Extension</a>
   </div>
 </div>
 
@@ -43,6 +43,10 @@ subtitle: 16-Year-Old Entrepreneur & Software Engineer
     <div class="timeline-content">
       <h3>2024 - 1st Place TYE Global Pitch Competition</h3>
       <p>Won $150k Letter of Intent for Soundwave AI speech processing platform at Microsoft.</p>
+      <div class="timeline-links">
+        <a href="https://www.geekwire.com/2024/high-schoolers-developing-accent-softening-tool-for-call-center-agents-win-teen-startup-competition/">GeekWire Coverage</a> |
+        <a href="https://tyeglobal.org/tye-global-2024-winner/">TYE Global Winners</a>
+      </div>
     </div>
   </div>
 
@@ -51,6 +55,9 @@ subtitle: 16-Year-Old Entrepreneur & Software Engineer
     <div class="timeline-content">
       <h3>2023 - Subsystem Lead, HuskySat-2</h3>
       <p>Leading 15-engineer team on $265k DoD contract for satellite Earth Tracker system.</p>
+      <div class="timeline-links">
+        <a href="https://huskysat.org/team">Husky Satellite Lab Team</a>
+      </div>
     </div>
   </div>
 
@@ -99,60 +106,113 @@ subtitle: 16-Year-Old Entrepreneur & Software Engineer
 <style>
 .timeline {
   position: relative;
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
+  padding: 0 20px;
 }
 
 .timeline::before {
   content: '';
   position: absolute;
-  left: 30px;
+  left: 50%;
   top: 0;
   bottom: 0;
-  width: 2px;
-  background: #007acc;
+  width: 3px;
+  background: linear-gradient(to bottom, #667eea, #764ba2);
+  transform: translateX(-50%);
+  border-radius: 2px;
 }
 
 .timeline-item {
   position: relative;
-  margin-bottom: 30px;
-  padding-left: 80px;
+  margin-bottom: 40px;
+  width: 50%;
+  padding-right: 40px;
+}
+
+.timeline-item:nth-child(even) {
+  left: 50%;
+  padding-right: 0;
+  padding-left: 40px;
 }
 
 .timeline-marker {
   position: absolute;
-  left: 20px;
-  top: 0;
-  width: 20px;
-  height: 20px;
+  right: -12px;
+  top: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: #007acc;
-  border: 3px solid #fff;
-  box-shadow: 0 0 0 3px #007acc;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: 4px solid #fff;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+  z-index: 1;
+}
+
+.timeline-item:nth-child(even) .timeline-marker {
+  left: -12px;
+  right: auto;
 }
 
 .timeline-content {
-  background: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  border: 1px solid rgba(0,0,0,0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.timeline-content:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.15);
 }
 
 .timeline-content h3 {
   margin-top: 0;
-  color: #333;
+  margin-bottom: 15px;
+  color: #2c3e50;
+  font-size: 1.3em;
+  font-weight: 600;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 8px;
 }
 
 .timeline-content p {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  color: #555;
+  line-height: 1.6;
+}
+
+.timeline-links {
+  margin-top: 15px;
+  font-size: 0.9em;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.timeline-links a {
+  color: #667eea;
+  text-decoration: none;
+  margin-right: 20px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.timeline-links a:hover {
+  color: #764ba2;
+  text-decoration: underline;
 }
 
 .timeline-content a {
-  color: #007acc;
+  color: #667eea;
   text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
 
 .timeline-content a:hover {
+  color: #764ba2;
   text-decoration: underline;
 }
 </style>
@@ -160,70 +220,140 @@ subtitle: 16-Year-Old Entrepreneur & Software Engineer
 <style>
 .introduction {
   text-align: center;
-  margin-bottom: 50px;
-  padding: 30px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  margin-bottom: 60px;
+  padding: 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.introduction::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.1;
 }
 
 .introduction h1 {
-  color: #2c3e50;
-  font-size: 2.5em;
+  color: white;
+  font-size: 3em;
   margin-bottom: 20px;
   font-weight: 300;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  position: relative;
+  z-index: 1;
 }
 
 .intro-text {
-  font-size: 1.2em;
-  line-height: 1.6;
-  color: #34495e;
-  max-width: 800px;
-  margin: 0 auto 30px;
+  font-size: 1.25em;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.95);
+  max-width: 900px;
+  margin: 0 auto 35px;
+  position: relative;
+  z-index: 1;
 }
 
 .intro-text strong {
-  color: #007acc;
-  font-weight: 600;
+  color: #ffd700;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 .links {
   display: flex;
   justify-content: center;
-  gap: 15px;
+  gap: 20px;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
 }
 
 .link-button {
   display: inline-block;
-  padding: 12px 24px;
-  background: #007acc;
+  padding: 14px 28px;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
   color: white;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: 500;
+  font-size: 0.95em;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0,122,204,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .link-button:hover {
-  background: #005a9e;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,122,204,0.3);
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  border-color: rgba(255,255,255,0.5);
 }
 
 @media (max-width: 768px) {
   .introduction h1 {
-    font-size: 2em;
+    font-size: 2.2em;
   }
   
   .intro-text {
     font-size: 1.1em;
+    padding: 0 20px;
   }
   
   .links {
     flex-direction: column;
     align-items: center;
+    gap: 12px;
+  }
+  
+  .link-button {
+    width: 200px;
+    text-align: center;
+  }
+  
+  .timeline {
+    padding: 0 10px;
+  }
+  
+  .timeline::before {
+    left: 20px;
+  }
+  
+  .timeline-item {
+    width: 100%;
+    padding-right: 0;
+    padding-left: 60px;
+    margin-bottom: 30px;
+  }
+  
+  .timeline-item:nth-child(even) {
+    left: 0;
+    padding-left: 60px;
+  }
+  
+  .timeline-marker {
+    left: 8px;
+    right: auto;
+  }
+  
+  .timeline-item:nth-child(even) .timeline-marker {
+    left: 8px;
+  }
+  
+  .timeline-content {
+    padding: 20px;
+  }
+  
+  .timeline-content h3 {
+    font-size: 1.2em;
   }
 }
 </style>
