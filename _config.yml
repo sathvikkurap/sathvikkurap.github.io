@@ -10,10 +10,10 @@
 ############################
 
 # Name of website
-title: Sathvik Kurapati
+title: My website
 
 # Your name to show in the footer
-author: Sathvik Kurapati
+author: Some Person
 
 ###############################################
 # --- List of links in the navigation bar --- #
@@ -21,9 +21,10 @@ author: Sathvik Kurapati
 
 navbar-links:
   About Me: "aboutme"
-  Projects: "projects"
-  Blog: "blog"
-  CV: "cv"
+  Resources:
+    - Beautiful Jekyll: "https://beautifuljekyll.com"
+    - Learn markdown: "https://www.markdowntutorial.com/"
+  Author's home: "https://deanattali.com"
 
 ################
 # --- Logo --- #
@@ -31,7 +32,7 @@ navbar-links:
 
 # Image to show in the navigation bar - works best with a square image
 # Remove this parameter if you don't want an image in the navbar
-avatar: "/assets/img/prof_pic.jpg"
+avatar: "/assets/img/avatar-icon.png"
 
 # By default, the image is cut into a circle. You can disable this behaviour by setting 'round-avatar: false'
 round-avatar: true
@@ -47,11 +48,16 @@ round-avatar: true
 
 # Select the social network links that you want to show in the footer.
 # You can change the order that they show up on the page by changing the order here.
+# Uncomment the links you want to show and add your information to each one.
 social-network-links:
-  email: "sathvik.kurapati2020@gmail.com"
-  linkedin: sathvikkurapati
-  github: sathvikkurap
-  rss: true
+  email: "someone@example.com"
+  rss: true  # remove this line if you don't want to show an RSS link at the bottom
+  facebook: deanattali
+  github: daattali
+  twitter: daattali
+  patreon: DeanAttali
+  youtube: "@daattali"
+  whatsapp: 15551212
 #  medium: yourname
 #  reddit: yourname or r/yoursubreddit
 #  linkedin: daattali
