@@ -9,6 +9,8 @@
 # --- Required options --- #
 ############################
 
+remote_theme: daattali/beautiful-jekyll
+
 # Name of website
 title: Sathvik Kurapati
 
