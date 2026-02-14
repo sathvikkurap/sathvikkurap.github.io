@@ -21,8 +21,8 @@ author: Sathvik Kurapati
 # --- List of links in the navigation bar --- #
 ###############################################
 
-navbar-links:
-  Home: ""
+# navbar-links:
+#   Home: ""
 
 ################
 # --- Logo --- #
